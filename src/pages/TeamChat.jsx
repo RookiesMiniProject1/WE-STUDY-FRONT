@@ -80,7 +80,7 @@ function TeamChat() {
   useEffect(() => {
     fetchStudyGroups();
   }, []);
-
+  
   const fetchStudyGroups = async () => {
     try {
       const response = await axios.get('/api/groups/my-groups');
@@ -89,14 +89,15 @@ function TeamChat() {
       setSnackbar({
         open: true,
         message: '스터디 그룹 목록을 불러오는데 실패했습니다.',
-        severity: 'error'
+        severity: 'error',
       });
     }
   };
-
+  
+  // WebSocket 연결 및 구독
   useEffect(() => {
     if (!selectedGroupId) return;
-
+  
     stompClient.current = new Client({
       webSocketFactory: () => new SockJS('http://localhost:8080/ws/chat'),
       connectHeaders: {
@@ -108,12 +109,23 @@ function TeamChat() {
         setSnackbar({
           open: true,
           message: '채팅 서버에 연결되었습니다.',
-          severity: 'success'
+          severity: 'success',
         });
-
+  
+        // 현재 방 구독
         if (currentRoom) {
           subscribeToRoom(currentRoom.id);
         }
+  
+        // 새로운 방 생성 이벤트 구독
+        stompClient.current.subscribe('/topic/new-room', (message) => {
+          try {
+            const newRoom = JSON.parse(message.body);
+            setRooms((prevRooms) => [...prevRooms, newRoom]);
+          } catch (error) {
+            console.error('새 채팅방 처리 오류:', error);
+          }
+        });
       },
       onDisconnect: () => {
         console.log('WebSocket Disconnected');
@@ -121,22 +133,21 @@ function TeamChat() {
         setSnackbar({
           open: true,
           message: '채팅 서버와 연결이 끊어졌습니다.',
-          severity: 'error'
+          severity: 'error',
         });
       },
       onStompError: (frame) => {
-        console.error('Stomp error:', frame);
+        console.error('STOMP error:', frame);
         setSnackbar({
           open: true,
           message: '채팅 서버 오류가 발생했습니다.',
-          severity: 'error'
+          severity: 'error',
         });
       },
     });
-
-
+  
     stompClient.current.activate();
-
+  
     return () => {
       if (stompClient.current) {
         if (currentSubscription.current) {
@@ -145,41 +156,37 @@ function TeamChat() {
         stompClient.current.deactivate();
       }
     };
-  }, [selectedGroupId]);
-
+  }, [selectedGroupId, currentRoom]);
+  
+  // 채팅방 목록 가져오기
   useEffect(() => {
     if (selectedGroupId) {
-      fetchRooms();
+      fetchRooms(); // 중복 선언 제거, 재사용
     }
   }, [selectedGroupId]);
+  
+  // 중복제거거거
+  const fetchRooms = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`/api/groups/${selectedGroupId}/chat/rooms`);
+      setRooms(response.data);
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: '채팅방 목록을 불러오는데 실패했습니다.',
+        severity: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  useEffect(() => {
-    let isSubscribed = true;
-
-    return () => {
-      isSubscribed = false;
-      if (currentRoom && stompClient.current && wsConnected) {
-        const leaveMessage = {
-          roomId: currentRoom.id,
-          senderName: localStorage.getItem('userEmail'),
-          type: 'LEAVE',
-          content: '',
-          timestamp: new Date().toISOString()
-        };
-
-        if (document.visibilityState === 'hidden') {
-          stompClient.current.publish({
-            destination: '/app/chat.leave',
-            body: JSON.stringify(leaveMessage)
-          });
-        }
-      }
-    };
-  }, [currentRoom, wsConnected]);
+  
 
   const handleGroupSelect = (groupId) => {
     setSelectedGroupId(groupId);
@@ -226,25 +233,6 @@ function TeamChat() {
           }
         }
     );
-  };
-
-
-
-
-  const fetchRooms = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`/api/groups/${selectedGroupId}/chat/rooms`);
-      setRooms(response.data);
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: '채팅방 목록을 불러오는데 실패했습니다.',
-        severity: 'error'
-      });
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleRoomSelect = async (room) => {
