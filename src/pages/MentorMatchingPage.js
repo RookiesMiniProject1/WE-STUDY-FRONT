@@ -273,11 +273,6 @@ const MentorMatchingPage = () => {
             </MenuItem>
           ))}
         </SelectStyle>
-        {selectedGroupId && groups.find(g => g.id === selectedGroupId) && (
-          <Typography variant="caption" color="primary" sx={{ mt: 1 }}>
-            선택된 스터디: {groups.find(g => g.id === selectedGroupId).title}
-          </Typography>
-        )}
       </FilterGroup>
 
       <FilterGroup>

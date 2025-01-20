@@ -87,19 +87,18 @@ export const TechTag = styled(Box)(({ theme }) => ({
 }));
 
 export const ContactButton = styled(Button)(({ theme }) => ({
-  backgroundColor: '#B19CD9',
   color: 'white',
-  boxShadow: '0 2px 4px rgba(177, 156, 217, .3)',
+  boxShadow: '0 2px 4px rgba(255, 153, 204, 0.3)',
   height: 42,
   padding: '0 20px',
   transition: 'all 0.3s ease-in-out',
   marginTop: '15px',
   width: '100%',
+  backgroundColor: '#B19CD9 !important', 
   '&:hover': {
-    backgroundColor: '#9F8AC7',
+    backgroundColor: '#FF80BF !important', 
     transform: 'translateY(-2px)',
-    boxShadow: '0 4px 6px rgba(177, 156, 217, .4)',
-  },
+  }
 }));
 
 export const FilterLabel = styled(Box)(({ theme }) => ({

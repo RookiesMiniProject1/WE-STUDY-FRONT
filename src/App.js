@@ -4,7 +4,6 @@ import Login from './pages/Login.js';
 import Signup from './pages/Signup.js'; 
 import MainPage from './pages/MainPage.js';
 import MyPage from './pages/MyPage.js';
-import BoardList from './components/BoardList.js';
 import MentorMatchingPage from './pages/MentorMatchingPage.js';
 import Assign from './pages/Assign.jsx';
 import Fileup from './pages/File.jsx';
@@ -16,6 +15,7 @@ import CreateStudyGroup from './components/CreateStudyGroup.js';
 import StudyGroupPage from './pages/StudyGroupPage.js';
 import StudyGroupDetail from './components/StudyGroupDetail.js';
 import MyStudyGroups from './pages/MyStudyGroups';
+import OpinionDetail from './pages/OpinionDetail.jsx';
 
 
 
@@ -28,7 +28,6 @@ const App = () => {
         <Route path="/main" element={<MainPage />} />
         <Route path="/Signup" element={<Signup />} />
         <Route path="/mypage" element={<MyPage />} />
-        <Route path="/boardlist" element={<BoardList />} />
         <Route path="/creategroup" element={<CreateStudyGroup />} />
         <Route path="/studygroup" element={<StudyGroupPage />} />
         <Route path="/groups/:id" element={<StudyGroupDetail />} />
@@ -38,6 +37,7 @@ const App = () => {
         <Route path="/fileup" element={<Fileup />} />
         <Route path="/notify" element={<Notify />} />
         <Route path="/opinion" element={<Opinion />} />
+        <Route path="/opinion/:postId" element={<OpinionDetail />} />
         <Route path="/teamchat" element={<TeamChat />} />
         <Route path="/todo" element={<Todo />} />
       </Routes>

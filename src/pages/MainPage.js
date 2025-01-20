@@ -18,7 +18,7 @@ import StudyGroupPage from './StudyGroupPage';
 import CreateStudyGroup from '../components/CreateStudyGroup';
 import MentorMatchingPage from './MentorMatchingPage';
 import TeamChat from './TeamChat';
-import BoardList from '../components/BoardList';
+import Notify from './Notify';
 import MyPage from './MyPage';
 import Todo from './Todo';
 import Opinion from './Opinion';
@@ -52,10 +52,10 @@ const MainPage = () => {
               <SubMenuItem onClick={() => setCurrentContent('teamchat')}>
                 팀채팅
               </SubMenuItem>
-              <SubMenuItem onClick={() => setCurrentContent('opinion')}>
+              <SubMenuItem onClick={() => setCurrentContent('notify')}>
                 공지 게시판
               </SubMenuItem>
-              <SubMenuItem>의견 공유 게시판</SubMenuItem>
+              <SubMenuItem onClick={() => setCurrentContent('opinion')}>의견 공유 게시판</SubMenuItem>
               <SubMenuItem onClick={() => {setCurrentContent('todo');}}>
                 칸반보드</SubMenuItem>
             </Container>
@@ -72,8 +72,8 @@ const MainPage = () => {
         return <StudyGroupPage />;
       case 'creategroup':
         return <CreateStudyGroup />;
-      case 'boardlist':
-        return <BoardList />;
+      case 'notify':
+        return <Notify />;
       case 'mentormatching':
         return <MentorMatchingPage />;
       case 'teamchat':          
