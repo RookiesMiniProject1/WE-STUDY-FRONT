@@ -18,7 +18,6 @@ import {
   DialogContent,
   DialogTitle,
   Button,
-  Container,
   List,
   ListItem,
   ListItemText,
@@ -30,7 +29,29 @@ import {
   FormControl,
   InputLabel,
   FormHelperText,
+  InputAdornment,
+  styled,
+  Container,
+  Pagination
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+
+import { 
+  Header, 
+  SearchContainer, 
+  CreateButton, 
+  FilterButton,
+  MatchButton,
+  StudyGrid, 
+  Card, 
+  StudyInfo, 
+  StudyTitle,
+  StyledDialog,
+  DialogActionButton,
+  RejectButton,
+  PaginationStyled,
+  ChipStyled
+} from '../styles/StudyGroupStyles';
 
 function Opinion() {
   const navigate = useNavigate();
@@ -54,6 +75,7 @@ function Opinion() {
   const [selectedPost, setSelectedPost] = useState();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+
   const [openAdd, setOpenAdd] = useState(false);
   const [openPost, setOpenPost] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
@@ -62,6 +84,11 @@ function Opinion() {
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [selectedGroupId, setSelectedGroupId] = useState(0);
+
+  const [displayedPosts, setDisplayedPosts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   //랜더링 시 유저가 가입한 그룹정보, 유저 정보, 게시글 한번 불러오기
   useEffect(() => {
@@ -74,7 +101,7 @@ function Opinion() {
         setMyGroups(res1.data);
         setProfile(res2.data);
         setUserId(res2.data.data.userId);
-        setPosts(res3.data);
+        setPosts(res3.data.filter((post)=>post.boardType === "DISCUSSION"));
         if (res2.data.data.role === "MENTOR") {
           setIsMentor(true);
         }
@@ -97,7 +124,7 @@ function Opinion() {
     axios
       .get(url)
       .then((response) => {
-        setPosts(response.data);
+        setPosts(response.data.filter((post)=>post.boardType === "DISCUSSION"));
         setIsUpdate(false);
       })
       .catch((error) => {
@@ -111,15 +138,12 @@ function Opinion() {
       .finally(() => {
         setIsLoading(false);
       });
-
-     
   }, [isUpdate]);
 
   //그룹변경될 때 마다 권한 재설정
   useEffect(() => {
-    if(!profile)
-      return
-    console.log("그룹변경")
+    if (!profile) return;
+    console.log("그룹변경");
     let url = `/api/posts`;
     if (selectedGroupId) {
       url = `/api/posts/group/${selectedGroupId}`;
@@ -127,7 +151,7 @@ function Opinion() {
     axios
       .get(url)
       .then((response) => {
-        setPosts(response.data);
+        setPosts(response.data.filter((post)=>post.boardType === "DISCUSSION"));
         setIsUpdate(false);
       })
       .catch((error) => {
@@ -141,35 +165,35 @@ function Opinion() {
       .finally(() => {
         setIsLoading(false);
       });
-      console.log(selectedGroupId)
-      console.log(myGroups)
-      console.log(profile)
-      if (!selectedGroupId) {
-        if (profile.data.role === "MENTOR") {
-          setIsMentor(true);
-          setIsLeader(false);
-        } else {
-          setIsMentor(false);
-          setIsLeader(false);
-        }
+    console.log(selectedGroupId);
+    console.log(myGroups);
+    console.log(profile);
+    if (!selectedGroupId) {
+      if (profile.data.role === "MENTOR") {
+        setIsMentor(true);
+        setIsLeader(false);
       } else {
-        const currentGroup = myGroups.find(
-          (group) => group.id === selectedGroupId
-        );
-        const role = currentGroup.members.find(
-          (member) => member.userId === userId
-        )?.role ?? null;
-        if (role === "LEADER") {
-          setIsLeader(true);
-          setIsMentor(false);
-        } else if (role === "MENTOR") {
-          setIsMentor(true);
-          setIsLeader(false);
-        } else {
-          setIsLeader(false);
-          setIsMentor(false);
-        }
+        setIsMentor(false);
+        setIsLeader(false);
       }
+    } else {
+      const currentGroup = myGroups.find(
+        (group) => group.id === selectedGroupId
+      );
+      const role =
+        currentGroup.members.find((member) => member.userId === userId)?.role ??
+        null;
+      if (role === "LEADER") {
+        setIsLeader(true);
+        setIsMentor(false);
+      } else if (role === "MENTOR") {
+        setIsMentor(true);
+        setIsLeader(false);
+      } else {
+        setIsLeader(false);
+        setIsMentor(false);
+      }
+    }
   }, [selectedGroupId]);
 
   //게시글 클릭 마다 연결된 댓글 불러오기기
@@ -189,6 +213,26 @@ function Opinion() {
         setIsLoading(false);
       });
   }, [postId]);
+  //페이징
+  useEffect(() => {
+
+    if(!posts){
+      return;
+    }
+    const filteredPosts = posts.filter(
+      (post) =>
+        post.title.includes(searchQuery) || post.content.includes(searchQuery)
+    );
+
+    // 페이징 적용
+    const startIndex = (currentPage - 1) * pageSize;
+    const paginatedPosts = filteredPosts.slice(
+      startIndex,
+      startIndex + pageSize
+    );
+
+    setDisplayedPosts(paginatedPosts);
+  }, [searchQuery, currentPage, posts, pageSize]);
 
   //로딩 대기
   if (isLoading)
@@ -320,7 +364,7 @@ function Opinion() {
     let data = {
       title,
       content,
-      boardType: "DISCUSSION",
+      boardType: "DISCUSSIONION",
     };
     if (selectedGroupId) {
       data.groupId = selectedGroupId;
@@ -375,7 +419,6 @@ function Opinion() {
         getPost(postId);
         handleEditClose();
         setIsUpdate(true);
-        
       })
       .catch((error) => {
         const errorMessage = error.response?.data?.message || error.message;
@@ -406,7 +449,6 @@ function Opinion() {
   console.log(isAuthor);
   console.log(userId);
 
-
   //게시판 그룹 선택
   function selectGroup() {
     if (openPost || openAdd) return;
@@ -424,12 +466,12 @@ function Opinion() {
             >
               {/* myGroups 리스트 생성 기본값 전체 계시판 추가 */}
               <MenuItem value={0}>전제 게시판</MenuItem>
-              {myGroups && 
+              {myGroups &&
                 myGroups.map((group) => (
-                <MenuItem key={group.id} value={group.id}>
-                  {group.title} {/* 그룹 이름 */}
-                </MenuItem>
-              ))}
+                  <MenuItem key={group.id} value={group.id}>
+                    {group.title} {/* 그룹 이름 */}
+                  </MenuItem>
+                ))}
             </Select>
             <FormHelperText>게시판 그룹을 선택하세요</FormHelperText>
           </FormControl>
@@ -713,7 +755,17 @@ function Opinion() {
   //게시글 불러오기 화면
   function initPage() {
     return (
-      <>
+      <div>
+        {/* 검색 필드 */}
+        <TextField
+          label="검색"
+          variant="outlined"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="제목이나 내용을 검색하세요"
+          sx={{ margin: "20px 0", width: "300px" }}
+        />
+
         <TableContainer
           component={Paper}
           sx={{
@@ -757,8 +809,8 @@ function Opinion() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {posts && posts.length > 0 ? (
-                posts
+              {displayedPosts && displayedPosts.length > 0 ? (
+                displayedPosts
                   .filter((post) => {
                     if (selectedGroupId === 0) {
                       return post.groupId === null;
@@ -830,7 +882,21 @@ function Opinion() {
             </Button>
           </Box>
         </TableContainer>
-      </>
+        <PaginationStyled>
+        <Pagination
+          count={Math.ceil(
+            posts.filter(
+              (post) =>
+                post.title.includes(searchQuery) ||
+                post.content.includes(searchQuery)
+            ).length / pageSize
+          )} // 필터링된 데이터 기준 총 페이지 수 계산
+          page={currentPage}
+          onChange={(event, value) => setCurrentPage(value)}
+          color="primary"
+          sx={{ margin: "20px 0", display: "flex", justifyContent: "center" }}/>
+          </PaginationStyled>
+      </div>
     );
   }
 
