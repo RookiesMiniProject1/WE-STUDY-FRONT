@@ -34,8 +34,8 @@ function AssignDetail({ groupId, assignId, onBack }) {
   const [editDeadline, setEditDeadline] = useState("");
   const [submissionContent, setSubmissionContent] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [feedbacks, setFeedbacks] = useState({}); // 변경: 각 제출물별 피드백
-  const [scores, setScores] = useState({}); // 변경: 각 제출물별 점수
+  const [feedbacks, setFeedbacks] = useState({});
+  const [scores, setScores] = useState({});
 
   useEffect(() => {
     fetchData();
@@ -51,10 +51,8 @@ function AssignDetail({ groupId, assignId, onBack }) {
 
       setAssign(assignRes.data);
       setSubmissions(submissionsRes.data);
-      // 수정: profileRes.data.data에서 role 가져오기
       setUserRole(profileRes.data.data.role);
 
-      // 디버깅을 위한 콘솔 로그
       console.log("Profile response:", profileRes.data);
       console.log("User role:", profileRes.data.data.role);
     } catch (error) {
@@ -126,7 +124,25 @@ function AssignDetail({ groupId, assignId, onBack }) {
     }
   };
 
-  // 변경: 멘토 피드백 처리 함수
+  const handleDeleteAssign = async () => {
+    if (!window.confirm('과제를 삭제하시겠습니까?')) {
+        return;
+    }
+
+    try {
+        await axios.delete(`/api/groups/${groupId}/tasks/${assignId}`);
+        alert('과제가 삭제되었습니다.');
+        onBack();
+    } catch (error) {
+        console.error('과제 삭제 실패:', error);
+        if (error.response && error.response.status === 403) {
+            alert('과제를 삭제할 권한이 없습니다.');
+        } else {
+            alert('과제 삭제에 실패했습니다.');
+        }
+    }
+  };
+
   const handleMentorFeedback = async (submissionId) => {
     try {
       await axios.post(
@@ -136,7 +152,6 @@ function AssignDetail({ groupId, assignId, onBack }) {
           score: parseInt(scores[submissionId]),
         },
       );
-      // 해당 제출물의 피드백과 점수 초기화
       setFeedbacks((prev) => ({ ...prev, [submissionId]: "" }));
       setScores((prev) => ({ ...prev, [submissionId]: "" }));
       fetchData();
@@ -169,17 +184,27 @@ function AssignDetail({ groupId, assignId, onBack }) {
             <Typography>
               마감일: {new Date(assign.deadline).toLocaleString()}
             </Typography>
-            {userRole === "MENTOR" && (
-              <StatusSelect
-                select // select 속성 추가
-                value={assign.status}
-                onChange={(e) => handleStatusChange(e.target.value)}
-              >
-                <MenuItem value="TODO">할 일</MenuItem>
-                <MenuItem value="IN_PROGRESS">진행중</MenuItem>
-                <MenuItem value="COMPLETED">완료</MenuItem>
-              </StatusSelect>
-            )}
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              {userRole === "MENTOR" && (
+                <>
+                  <StatusSelect
+                    select
+                    value={assign.status}
+                    onChange={(e) => handleStatusChange(e.target.value)}
+                  >
+                    <MenuItem value="TODO">할 일</MenuItem>
+                    <MenuItem value="IN_PROGRESS">진행중</MenuItem>
+                    <MenuItem value="COMPLETED">완료</MenuItem>
+                  </StatusSelect>
+                  <ActionButton 
+                    variant="delete"
+                    onClick={handleDeleteAssign}
+                  >
+                    과제 삭제
+                  </ActionButton>
+                </>
+              )}
+            </Box>
           </AssignInfo>
         </AssignHeader>
         <Divider />

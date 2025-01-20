@@ -189,6 +189,7 @@ export const AssignInfo = styled('div')(({ theme }) => ({
   justifyContent: "space-between",
   alignItems: "center",
   color: '#666',
+  gap: theme.spacing(2),
 }));
 
 export const AssignContent = styled('div')(({ theme }) => ({
@@ -261,3 +262,4 @@ export const StatusSelect = styled(TextField)(({ theme }) => ({
     },
   },
 }));
+

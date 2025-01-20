@@ -1,9 +1,7 @@
 import axios from "../api/axios";
-import BoardList from "../components/BoardList.js";
-import BoardWrite from "../components/BoardWrite.js";
-import BoardView from "../components/BoardView.js";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
+import SearchIcon from '@mui/icons-material/Search';
 import {
   Table,
   TableBody,
@@ -13,14 +11,7 @@ import {
   TableRow,
   Paper,
   Typography,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Button,
-  List,
-  ListItem,
-  ListItemText,
   TextField,
   Menu,
   MenuItem,
@@ -33,24 +24,24 @@ import {
   styled,
   Container,
   Pagination,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Chip,
 } from "@mui/material";
 
 import {
-  Header,
-  SearchContainer,
-  CreateButton,
-  FilterButton,
-  MatchButton,
-  StudyGrid,
-  Card,
-  StudyInfo,
-  StudyTitle,
-  StyledDialog,
-  DialogActionButton,
-  RejectButton,
-  PaginationStyled,
-  ChipStyled,
-} from "../styles/StudyGroupStyles";
+  MainContainer,
+  SearchBox,
+  StyledPaper,
+  ActionButton,
+  StyledFormControl,
+  PageTitle,
+  Header
+} from '../styles/NotifyStyles';
+import { 
+  PaginationStyled
+} from '../styles/StudyGroupStyles';
 
 function Opinion() {
   const navigate = useNavigate();
@@ -390,13 +381,6 @@ function Opinion() {
     }
     return (
       <>
-        {/*
-         <Dialog open={openAdd} onClose={handleAddClose}>
-        <DialogTitle>게시글 작성</DialogTitle>
-        <DialogContent>
-        
-        게시글 등록을 모달로 디자인 하신다면 주석을 풀고 box를 지워주세요!
-        */}
         <Box sx={{ padding: 4 }}>
           <TextField
             label="제목"
@@ -440,13 +424,6 @@ function Opinion() {
     }
     return (
       <>
-        {/*
-         <Dialog open={openAdd} onClose={handleAddClose}>
-        <DialogTitle>게시글 수정</DialogTitle>
-        <DialogContent>
-        
-        게시글 등록을 모달로 디자인 하신다면 주석을 풀고 box를 지워주세요!
-        */}
         <Box sx={{ padding: 4 }}>
           <TextField
             label="제목"
@@ -490,12 +467,6 @@ function Opinion() {
     }
     return (
       <>
-        {/*<Dialog open={selectedPost !== null} onClose={handlePostClose}>
-          <DialogTitle>{selectedPost.title}</DialogTitle>
-          <DialogContent>
-          
-          게시글 상세 보기를 모달로 디자인 하신다면 주석 풀고 박스 지워주세요
-          */}
         <Box sx={{ padding: 4 }}>
           <Typography variant="h6" sx={{ marginBottom: 2 }}>
             {selectedPost.title}
@@ -691,35 +662,145 @@ function Opinion() {
     );
   }
 
-  //메인 랜더링
   return (
-    <>
-      <div>{selectGroup()}</div>
-      <div>
-        {/*모달로 구현할 경우 코드드
-          {viewPage()}
-          {postPage()}
-          {initPage()}
-          {editPage()}
-        */}
+    <MainContainer>
+      <PageTitle>
+        {selectedGroupId === 0
+          ? "전체 공지사항"
+          : `${myGroups?.find((group) => group.id === selectedGroupId)?.title} 공지사항`}
+      </PageTitle>
 
-        {/* 모달 구현인 경우 여기부터*/}
-        {(() => {
-          if (openPost) {
-            if (openEdit) {
-              return editPage();
-            } else {
-              return viewPage();
-            }
-          } else if (openAdd) {
-            return postPage();
-          } else {
-            return initPage();
-          }
-        })()}
-        {/* 여기까지 삭제*/}
-      </div>
-    </>
+      <Header>
+        <SearchBox>
+          <TextField
+            placeholder="제목이나 내용으로 검색"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            size="small"
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: '#B19CD9' }} />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </SearchBox>
+
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <StyledFormControl size="small">
+            <Select
+              value={selectedGroupId}
+              onChange={(e) => handleGroupChange(e.target.value)}
+              displayEmpty
+            >
+              <MenuItem value={0}>전체 게시판</MenuItem>
+              {myGroups &&
+                myGroups.map((group) => (
+                  <MenuItem key={group.id} value={group.id}>
+                    {group.title}
+                  </MenuItem>
+                ))}
+            </Select>
+          </StyledFormControl>
+
+          <ActionButton
+            variant="contained"
+            onClick={handleAddClick}
+            disabled={!(isLeader || isMentor)}
+          >
+            공지사항 작성
+          </ActionButton>
+        </Box>
+      </Header>
+
+      <StyledPaper>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell width="10%">번호</TableCell>
+                <TableCell width="50%">제목</TableCell>
+                <TableCell width="20%">작성자</TableCell>
+                <TableCell width="20%">작성일</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {displayedPosts && displayedPosts.length > 0 ? (
+                displayedPosts.map((post, index) => (
+                  <TableRow 
+                    key={post.id}
+                    onClick={() => handlePostClick(post.id)}
+                    sx={{ cursor: 'pointer' }}
+                  >
+                    <TableCell>{(currentPage - 1) * pageSize + index + 1}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {post.title}
+                        {post.comments && post.comments.length > 0 && (
+                          <Chip
+                            label={post.comments.length}
+                            size="small"
+                            sx={{
+                              ml: 1,
+                              backgroundColor: 'rgba(177, 156, 217, 0.2)',
+                              color: '#6A1B9A',
+                            }}
+                          />
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell>{post.authorEmail.split("@")[0]}</TableCell>
+                    <TableCell>{post.createdAt.split("T")[0]}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    게시글이 없습니다. 새로운 공지사항을 작성해보세요.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+          <Pagination
+            count={Math.ceil(
+              (posts?.filter(
+                post =>
+                  post.title.includes(searchQuery) ||
+                  post.content.includes(searchQuery)
+              ).length || 0) / pageSize
+            )}
+            page={currentPage}
+            onChange={(e, value) => setCurrentPage(value)}
+            color="secondary"
+          />
+        </Box>
+      </StyledPaper>
+
+      {/* 게시글 상세보기 모달 */}
+      <Dialog open={openPost} onClose={handlePostClose} maxWidth="md" fullWidth>
+        <DialogTitle>
+          {selectedPost?.title}
+        </DialogTitle>
+        <DialogContent>
+          {openEdit ? editPage() : viewPage()}
+        </DialogContent>
+      </Dialog>
+
+      {/* 게시글 작성 모달 */}
+      <Dialog open={openAdd} onClose={handleAddClose} maxWidth="md" fullWidth>
+        <DialogTitle>공지사항 작성</DialogTitle>
+        <DialogContent>
+          {postPage()}
+        </DialogContent>
+      </Dialog>
+
+    </MainContainer>
   );
 }
 

@@ -16,7 +16,6 @@ import StudyGroupDetail from './components/StudyGroupDetail.js';
 import MyStudyGroups from './pages/MyStudyGroups';
 import OpinionDetail from './pages/OpinionDetail.jsx';
 import AssignDetail from './pages/AssignDetail.jsx';
-import Calendar from './pages/Calendar.js';
 
 
 
@@ -34,12 +33,11 @@ const App = () => {
         <Route path="/groups/:id" element={<StudyGroupDetail />} />
         <Route path="/mentormathcing" element={<MentorMatchingPage />} />
         <Route path="/mygroups" element={<MyStudyGroups />} />
-        <Route path="/assign" element={<Assign />} />]
+        <Route path="/assign" element={<Assign />} />
         <Route path="/notify" element={<Notify />} />
         <Route path="/opinion" element={<Opinion />} />
         <Route path="/opinion/:postId" element={<OpinionDetail />} />
         <Route path="/opinion/:postId" element={<AssignDetail />} />
-        <Route path="/calendar" element={<Calendar />} />
         <Route path="/teamchat" element={<TeamChat />} />
         <Route path="/todo" element={<Todo />} />
       </Routes>
