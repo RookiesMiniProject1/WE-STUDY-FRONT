@@ -6,7 +6,6 @@ import MainPage from './pages/MainPage.js';
 import MyPage from './pages/MyPage.js';
 import MentorMatchingPage from './pages/MentorMatchingPage.js';
 import Assign from './pages/Assign.jsx';
-import Fileup from './pages/File.jsx';
 import Notify from './pages/Notify.jsx';
 import Opinion from './pages/Opinion.jsx';
 import TeamChat from './pages/TeamChat.jsx';
@@ -16,6 +15,8 @@ import StudyGroupPage from './pages/StudyGroupPage.js';
 import StudyGroupDetail from './components/StudyGroupDetail.js';
 import MyStudyGroups from './pages/MyStudyGroups';
 import OpinionDetail from './pages/OpinionDetail.jsx';
+import AssignDetail from './pages/AssignDetail.jsx';
+import Calendar from './pages/Calendar.js';
 
 
 
@@ -33,11 +34,12 @@ const App = () => {
         <Route path="/groups/:id" element={<StudyGroupDetail />} />
         <Route path="/mentormathcing" element={<MentorMatchingPage />} />
         <Route path="/mygroups" element={<MyStudyGroups />} />
-        <Route path="/assign" element={<Assign />} />
-        <Route path="/fileup" element={<Fileup />} />
+        <Route path="/assign" element={<Assign />} />]
         <Route path="/notify" element={<Notify />} />
         <Route path="/opinion" element={<Opinion />} />
         <Route path="/opinion/:postId" element={<OpinionDetail />} />
+        <Route path="/opinion/:postId" element={<AssignDetail />} />
+        <Route path="/calendar" element={<Calendar />} />
         <Route path="/teamchat" element={<TeamChat />} />
         <Route path="/todo" element={<Todo />} />
       </Routes>

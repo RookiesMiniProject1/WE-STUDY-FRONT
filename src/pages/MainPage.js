@@ -22,6 +22,8 @@ import Notify from './Notify';
 import MyPage from './MyPage';
 import Todo from './Todo';
 import Opinion from './Opinion';
+import Assign from './Assign';
+import Calendar from './Calendar';
 
 const MainPage = () => {
   const navigate = useNavigate();
@@ -56,8 +58,26 @@ const MainPage = () => {
                 공지 게시판
               </SubMenuItem>
               <SubMenuItem onClick={() => setCurrentContent('opinion')}>의견 공유 게시판</SubMenuItem>
-              <SubMenuItem onClick={() => {setCurrentContent('todo');}}>
-                칸반보드</SubMenuItem>
+              <SubMenuItem onClick={() => {setCurrentContent('assign');}}>
+                과제 게시판</SubMenuItem>
+            </Container>
+          </SubNavigationBar>
+        );
+        case 'planner':
+        return (
+          <SubNavigationBar
+            component={motion.div}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center' }}>
+              <SubMenuItem onClick={() => setCurrentContent('todo')}>
+                칸반보드
+              </SubMenuItem>
+              <SubMenuItem onClick={() => setCurrentContent('calendar')}>
+                캘린더
+              </SubMenuItem>
             </Container>
           </SubNavigationBar>
         );
@@ -84,6 +104,10 @@ const MainPage = () => {
         return <MyPage />;
       case 'opinion':
         return <Opinion />;
+      case 'assign':
+        return <Assign />;
+      case 'calendar':
+        return <Calendar />;
       case 'main':
       default:
         return <MainContent />;
@@ -129,6 +153,10 @@ const MainPage = () => {
               <Tab 
                 label="마이스터디"
                 onClick={() => setSelectedMenu('study')}
+              />
+              <Tab 
+                label="마이플래너"
+                onClick={() => setSelectedMenu('planner')}
               />
             </Tabs>
 
